@@ -1,0 +1,68 @@
+executor: KubernetesExecutor
+
+images:
+  airflow:
+    repository: apache-airflow-custom
+    tag: latest
+    pullPolicy: IfNotPresent
+
+postgresql:
+  enabled: false
+
+data:
+  metadataSecretName: airflow-secrets
+
+enableBuiltInSecretEnvVars:
+  AIRFLOW__CORE__FERNET_KEY: false
+  AIRFLOW__WEBSERVER__SECRET_KEY: false
+
+fernetKeySecretName: airflow-secrets
+webserverSecretKeySecretName: airflow-secrets
+
+dags:
+  persistence:
+    enabled: true
+    existingClaim: airflow-dags-pvc
+  gitSync:
+    enabled: true
+    repo: https://github.com/wahyu-n/test-airflow-kubernetes.git
+    branch: master
+    rev: HEAD
+    depth: 1
+    subPath: ""
+    wait: 10
+
+logs:
+  persistence:
+    enabled: true
+    existingClaim: airflow-logs-pvc
+
+webserver:
+  service:
+    type: NodePort
+    ports:
+    - name: airflow-ui
+      port: 80
+      targetPort: airflow-ui
+
+# scheduler:
+#   extraVolumes:
+#     - name: dags-repository
+#       emptyDir: {}
+#   extraVolumeMounts:
+#     - name: dags-repository
+#       mountPath: /opt/airflow/dags
+
+# workers:
+#   extraVolumes:
+#     - name: dags-repository
+#       emptyDir: {}
+#   extraVolumeMounts:
+#     - name: dags-repository
+#       mountPath: /opt/airflow/dags
+
+env:
+  - name: PYTHONPATH
+    value: /opt/airflow/src
+  - name: AIRFLOW__CORE__DEFAULT_TIMEZONE
+    value: Asia/Jakarta
