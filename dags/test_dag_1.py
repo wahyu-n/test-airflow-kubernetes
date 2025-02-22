@@ -32,7 +32,7 @@ with DAG(
     )
 
     load_task = PythonOperator(
-        task_id='transform-task',
+        task_id='load_task',
         python_callable=transform
     )
 
